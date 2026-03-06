@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: crashloop-demo
+  labels:
+    app.kubernetes.io/part-of: deckhand-lab
+    deckhand.io/scenario: crashloop
+spec:
+  restartPolicy: Always
+  containers:
+    - name: crash
+      image: alpine:3.20
+      command: ["/bin/sh","-c"]
+      args:
+        - |
+          echo "crashing intentionally";
+          exit 1

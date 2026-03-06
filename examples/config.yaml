@@ -1,0 +1,18 @@
+theme: default
+readonly: false
+defaultMode: ops
+favorites:
+  contexts:
+    - devcluster
+    - prodcluster
+  namespaces:
+    - default
+    - openshift-pipelines
+confirmations:
+  delete: true
+  patch: true
+  cancelPipelineRun: true
+ui:
+  showHeader: true
+  showFooter: true
+  refreshIntervalSeconds: 5

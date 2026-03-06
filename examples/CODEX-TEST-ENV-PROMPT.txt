@@ -1,0 +1,44 @@
+Open the existing Deckhand repo and treat this extracted test environment pack as an overlay.
+
+Do NOT restart or rewrite the project from scratch.
+
+Your job:
+1. Read:
+   - docs/test-strategy.md
+   - docs/test-matrix.md
+   - docs/openshift-local-notes.md
+
+2. Add a practical local test strategy to the repo:
+   - primary lane: kind + Tekton
+   - secondary lane: OpenShift Local + OpenShift Pipelines
+
+3. Implement any missing repo docs needed so another engineer can stand up the environments quickly.
+
+4. Add or refine helper scripts/manifests for:
+   - kind cluster creation
+   - Tekton install
+   - sample success PipelineRun
+   - sample failing PipelineRun
+   - sample crashloop pod
+   - sample pending pod
+
+5. Keep Deckhand itself environment-agnostic:
+   - plain Kubernetes + Tekton must work
+   - OpenShift-aware features should activate only when APIs are present
+   - missing Tekton/OpenShift APIs must degrade gracefully
+
+6. Add or refine docs that explain how to test:
+   - Ops Mode
+   - Pipeline Mode
+   - error highlighting
+   - namespace/project switching
+   - RBAC/read-only behavior
+
+7. Preserve existing working code.
+8. Prefer merge/upgrade work over broad rewrites.
+
+Start by summarizing:
+- what the repo already has
+- what this pack adds
+- which files should be merged or extended first
+- what can be tested immediately in kind + Tekton

@@ -1,0 +1,7 @@
+Treat this as a patch/upgrade, not a repo reset.
+
+- Merge overlay files into the existing Deckhand project
+- Keep current working code intact
+- Add Tekton PipelineRun/TaskRun support
+- Add Route and namespace/project support
+- Wire new messages and commands into the existing Bubble Tea model

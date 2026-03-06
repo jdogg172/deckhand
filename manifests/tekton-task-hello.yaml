@@ -1,0 +1,14 @@
+apiVersion: tekton.dev/v1
+kind: Task
+metadata:
+  name: hello-task
+  labels:
+    app.kubernetes.io/part-of: deckhand-lab
+    deckhand.io/scenario: pipeline-success
+spec:
+  steps:
+    - name: echo
+      image: alpine:3.20
+      script: |
+        #!/bin/sh
+        echo "hello from tekton"

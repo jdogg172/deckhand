@@ -1,0 +1,10 @@
+apiVersion: tekton.dev/v1
+kind: PipelineRun
+metadata:
+  generateName: hello-pipeline-success-
+  labels:
+    app.kubernetes.io/part-of: deckhand-lab
+    deckhand.io/scenario: pipeline-success
+spec:
+  pipelineRef:
+    name: hello-pipeline

@@ -1,0 +1,21 @@
+apiVersion: tekton.dev/v1
+kind: PipelineRun
+metadata:
+  generateName: hello-pipeline-fail-
+  labels:
+    app.kubernetes.io/part-of: deckhand-lab
+    deckhand.io/scenario: pipeline-fail
+spec:
+  taskRunTemplate:
+    serviceAccountName: default
+  pipelineSpec:
+    tasks:
+      - name: fail-now
+        taskSpec:
+          steps:
+            - name: fail
+              image: alpine:3.20
+              script: |
+                #!/bin/sh
+                echo "forcing failure"
+                exit 42
