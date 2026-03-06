@@ -14,11 +14,17 @@ Deckhand is a keyboard-first TUI for Kubernetes/OpenShift operations and Tekton 
 ```bash
 go mod tidy
 go test ./...
-go build ./cmd/deckhand
+go build -o dist/deckhand ./cmd/deckhand
 
-./deckhand.exe
-./deckhand.exe --readonly
-./deckhand.exe --mode pipeline
+# Linux/macOS
+./dist/deckhand
+./dist/deckhand --readonly
+./dist/deckhand --mode pipeline
+
+# Windows (PowerShell)
+.\dist\deckhand.exe
+.\dist\deckhand.exe --readonly
+.\dist\deckhand.exe --mode pipeline
 ```
 
 ## Local test strategy
@@ -48,7 +54,11 @@ See:
 ## Immediate kind + Tekton smoke path
 ```bash
 ./scripts/setup-kind-tekton.sh
-./deckhand.exe --context kind-deckhand-dev --namespace deckhand-lab
+./dist/deckhand --context kind-deckhand-dev --namespace deckhand-lab
+
+# Windows (PowerShell)
+.\scripts\setup-kind-tekton.ps1
+.\dist\deckhand.exe --context kind-deckhand-dev --namespace deckhand-lab
 ```
 
 Then verify in Deckhand:
