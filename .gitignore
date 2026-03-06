@@ -1,0 +1,21 @@
+# Build artifacts
+/dist/
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Archives and local packs
+*.zip
+*.tar
+*.tar.gz
+*.tgz
+
+# Generated local cluster config
+kind-config.yaml
+
+# OS/editor noise
+.DS_Store
+Thumbs.db
+.vscode/*.log
