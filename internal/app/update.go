@@ -10,9 +10,9 @@ import (
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
 
-	"github.com/example/deckhand/internal/resources"
-	"github.com/example/deckhand/internal/ui/modes"
-	"github.com/example/deckhand/internal/ui/panes"
+	"github.com/jdogg172/deckhand/internal/resources"
+	"github.com/jdogg172/deckhand/internal/ui/modes"
+	"github.com/jdogg172/deckhand/internal/ui/panes"
 )
 
 func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
@@ -30,149 +30,8 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return m, nil
 
 	case tea.KeyMsg:
-		switch {
-		case key.Matches(msg, m.keys.Quit):
-			if m.listScope == listScopeNamespaces || m.listScope == listScopeContexts {
-				m.listScope = m.previousListScope
-				if m.mode == modes.PipelineMode {
-					m.list.Title = "PipelineRuns"
-				} else {
-					m.list.Title = "Pods"
-				}
-				return m, m.refreshCurrentScopeCmd()
-			}
-			return m, tea.Quit
-		case key.Matches(msg, m.keys.OpsMode):
-			m.mode = modes.OpsMode
-			m.listScope = listScopePods
-			m.list.Title = "Pods"
-			m.detailText = "Switching to Ops mode..."
-			return m, tea.Batch(m.refreshPodsCmd(), m.refreshPermissionsCmd())
-		case key.Matches(msg, m.keys.PipelineMode):
-			m.mode = modes.PipelineMode
-			m.listScope = listScopePipelines
-			m.list.Title = "PipelineRuns"
-			m.detailText = "Loading PipelineRuns..."
-			return m, tea.Batch(m.refreshPipelineRunsCmd(), m.refreshPermissionsCmd())
-		case key.Matches(msg, m.keys.Namespace):
-			m.previousListScope = m.listScope
-			m.listScope = listScopeNamespaces
-			m.list.Title = "Namespaces/Projects"
-			m.detailText = "Select namespace/project and press enter"
-			return m, m.loadNamespacesCmd()
-		case key.Matches(msg, m.keys.Context):
-			m.previousListScope = m.listScope
-			m.listScope = listScopeContexts
-			m.list.Title = "Contexts"
-			m.detailText = "Select context and press enter"
-			return m, m.loadContextsCmd()
-		case key.Matches(msg, m.keys.Routes):
-			m.listScope = listScopeRoutes
-			m.list.Title = "Routes"
-			return m, m.refreshRoutesCmd()
-		case key.Matches(msg, m.keys.Refresh):
-			return m, tea.Batch(m.refreshCurrentScopeCmd(), m.refreshPermissionsCmd())
-		case key.Matches(msg, m.keys.TaskRuns):
-			if m.mode == modes.PipelineMode {
-				m.listScope = listScopeTaskRuns
-				m.list.Title = "TaskRuns"
-				return m, m.loadTaskRunsCmd()
-			}
-			return m, nil
-		case key.Matches(msg, m.keys.OpenPod):
-			if m.mode == modes.PipelineMode && m.listScope == listScopeTaskRuns {
-				m.activeTab = "logs"
-				return m, m.loadLogsCmd()
-			}
-			return m, nil
-		case key.Matches(msg, m.keys.Details):
-			if m.listScope == listScopeNamespaces {
-				if selected, ok := m.list.SelectedItem().(panes.NamespaceItem); ok {
-					m.currentNamespace = selected.Name
-					m.cfg.Namespace = selected.Name
-					m.listScope = m.previousListScope
-					if m.mode == modes.PipelineMode {
-						m.list.Title = "PipelineRuns"
-					} else {
-						m.list.Title = "Pods"
-					}
-					m.statusText = "Switched to namespace/project: " + selected.Name
-					return m, tea.Batch(m.refreshCurrentScopeCmd(), m.refreshPermissionsCmd())
-				}
-				return m, nil
-			}
-			if m.listScope == listScopeContexts {
-				if selected, ok := m.list.SelectedItem().(panes.ContextItem); ok {
-					m.statusText = "Switching context: " + selected.Name
-					return m, m.switchContextCmd(selected.Name)
-				}
-				return m, nil
-			}
-			m.activeTab = "details"
-			if m.mode == modes.OpsMode || m.listScope == listScopeTaskRuns {
-				return m, m.loadDetailsCmd()
-			}
-			return m, nil
-		case key.Matches(msg, m.keys.Events):
-			m.activeTab = "events"
-			if m.mode == modes.OpsMode || m.listScope == listScopeTaskRuns {
-				return m, m.loadEventsCmd()
-			}
-			return m, nil
-		case key.Matches(msg, m.keys.YAML):
-			m.activeTab = "yaml"
-			if m.mode == modes.OpsMode || m.listScope == listScopeTaskRuns {
-				return m, m.loadYAMLCmd()
-			}
-			return m, nil
-		case key.Matches(msg, m.keys.Logs):
-			m.activeTab = "logs"
-			if m.mode == modes.OpsMode || m.listScope == listScopeTaskRuns {
-				return m, m.loadLogsCmd()
-			}
-			return m, nil
-		case key.Matches(msg, m.keys.Delete):
-			if m.cfg.ReadOnly {
-				m.statusText = "Read-only mode: delete blocked"
-				return m, nil
-			}
-			if !m.permissions.DeleteAllowed {
-				m.statusText = "Delete not allowed"
-				m.detailText = "RBAC: " + m.permissions.DeleteReason
-				return m, nil
-			}
-			if pod := m.selectedPodName(); pod != "" {
-				m.pendingConfirm = &pendingConfirmation{Action: "delete", Target: pod, Message: "Delete pod " + pod + "?"}
-			}
-			return m, nil
-		case key.Matches(msg, m.keys.Patch):
-			if m.cfg.ReadOnly {
-				m.statusText = "Read-only mode: patch blocked"
-				return m, nil
-			}
-			if !m.permissions.PatchAllowed {
-				m.statusText = "Patch not allowed"
-				m.detailText = "RBAC: " + m.permissions.PatchReason
-				return m, nil
-			}
-			if pod := m.selectedPodName(); pod != "" {
-				m.pendingConfirm = &pendingConfirmation{Action: "patch", Target: pod, Message: "Patch pod " + pod + " annotation?"}
-			}
-			return m, nil
-		case key.Matches(msg, m.keys.Cancel):
-			if m.cfg.ReadOnly {
-				m.statusText = "Read-only mode: cancel blocked"
-				return m, nil
-			}
-			if !m.permissions.CancelAllowed {
-				m.statusText = "Cancel not allowed"
-				m.detailText = "RBAC: " + m.permissions.CancelReason
-				return m, nil
-			}
-			if pr := m.selectedPipelineRunName(); pr != "" {
-				m.pendingConfirm = &pendingConfirmation{Action: "cancel", Target: pr, Message: "Cancel PipelineRun " + pr + "?"}
-			}
-			return m, nil
+		if updated, cmd, handled := m.handleKeyMsg(msg); handled {
+			return updated, cmd
 		}
 
 	case podsLoadedMsg:
@@ -366,4 +225,165 @@ func (m Model) handleConfirmationInput(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 	default:
 		return m, nil
 	}
+}
+
+func (m Model) handleKeyMsg(msg tea.KeyMsg) (Model, tea.Cmd, bool) {
+	switch {
+	case key.Matches(msg, m.keys.Quit):
+		if m.listScope == listScopeNamespaces || m.listScope == listScopeContexts {
+			m.listScope = m.previousListScope
+			m.restorePrimaryListTitle()
+			return m, m.refreshCurrentScopeCmd(), true
+		}
+		return m, tea.Quit, true
+	case key.Matches(msg, m.keys.OpsMode):
+		m.mode = modes.OpsMode
+		m.listScope = listScopePods
+		m.list.Title = "Pods"
+		m.detailText = "Switching to Ops mode..."
+		return m, tea.Batch(m.refreshPodsCmd(), m.refreshPermissionsCmd()), true
+	case key.Matches(msg, m.keys.PipelineMode):
+		m.mode = modes.PipelineMode
+		m.listScope = listScopePipelines
+		m.list.Title = "PipelineRuns"
+		m.detailText = "Loading PipelineRuns..."
+		return m, tea.Batch(m.refreshPipelineRunsCmd(), m.refreshPermissionsCmd()), true
+	case key.Matches(msg, m.keys.Namespace):
+		m.previousListScope = m.listScope
+		m.listScope = listScopeNamespaces
+		m.list.Title = "Namespaces/Projects"
+		m.detailText = "Select namespace/project and press enter"
+		return m, m.loadNamespacesCmd(), true
+	case key.Matches(msg, m.keys.Context):
+		m.previousListScope = m.listScope
+		m.listScope = listScopeContexts
+		m.list.Title = "Contexts"
+		m.detailText = "Select context and press enter"
+		return m, m.loadContextsCmd(), true
+	case key.Matches(msg, m.keys.Routes):
+		m.listScope = listScopeRoutes
+		m.list.Title = "Routes"
+		return m, m.refreshRoutesCmd(), true
+	case key.Matches(msg, m.keys.Refresh):
+		return m, tea.Batch(m.refreshCurrentScopeCmd(), m.refreshPermissionsCmd()), true
+	case key.Matches(msg, m.keys.TaskRuns):
+		if m.mode == modes.PipelineMode {
+			m.listScope = listScopeTaskRuns
+			m.list.Title = "TaskRuns"
+			return m, m.loadTaskRunsCmd(), true
+		}
+		return m, nil, true
+	case key.Matches(msg, m.keys.OpenPod):
+		if m.mode == modes.PipelineMode && m.listScope == listScopeTaskRuns {
+			m.activeTab = "logs"
+			return m, m.loadLogsCmd(), true
+		}
+		return m, nil, true
+	case key.Matches(msg, m.keys.Details):
+		if m.listScope == listScopeNamespaces {
+			if selected, ok := m.list.SelectedItem().(panes.NamespaceItem); ok {
+				m.currentNamespace = selected.Name
+				m.cfg.Namespace = selected.Name
+				m.listScope = m.previousListScope
+				m.restorePrimaryListTitle()
+				m.statusText = "Switched to namespace/project: " + selected.Name
+				return m, tea.Batch(m.refreshCurrentScopeCmd(), m.refreshPermissionsCmd()), true
+			}
+			return m, nil, true
+		}
+		if m.listScope == listScopeContexts {
+			if selected, ok := m.list.SelectedItem().(panes.ContextItem); ok {
+				m.statusText = "Switching context: " + selected.Name
+				return m, m.switchContextCmd(selected.Name), true
+			}
+			return m, nil, true
+		}
+		m.activeTab = "details"
+		if m.mode == modes.OpsMode || m.listScope == listScopeTaskRuns {
+			return m, m.loadDetailsCmd(), true
+		}
+		return m, nil, true
+	case key.Matches(msg, m.keys.Events):
+		m.activeTab = "events"
+		if m.mode == modes.OpsMode || m.listScope == listScopeTaskRuns {
+			return m, m.loadEventsCmd(), true
+		}
+		return m, nil, true
+	case key.Matches(msg, m.keys.YAML):
+		m.activeTab = "yaml"
+		if m.mode == modes.OpsMode || m.listScope == listScopeTaskRuns {
+			return m, m.loadYAMLCmd(), true
+		}
+		return m, nil, true
+	case key.Matches(msg, m.keys.Logs):
+		m.activeTab = "logs"
+		if m.mode == modes.OpsMode || m.listScope == listScopeTaskRuns {
+			return m, m.loadLogsCmd(), true
+		}
+		return m, nil, true
+	case key.Matches(msg, m.keys.Delete):
+		return m.requestDelete(), nil, true
+	case key.Matches(msg, m.keys.Patch):
+		return m.requestPatch(), nil, true
+	case key.Matches(msg, m.keys.Cancel):
+		return m.requestCancel(), nil, true
+	}
+
+	return m, nil, false
+}
+
+func (m Model) restorePrimaryListTitle() {
+	if m.mode == modes.PipelineMode {
+		m.list.Title = "PipelineRuns"
+		return
+	}
+	m.list.Title = "Pods"
+}
+
+func (m Model) requestDelete() Model {
+	if m.cfg.ReadOnly {
+		m.statusText = "Read-only mode: delete blocked"
+		return m
+	}
+	if !m.permissions.DeleteAllowed {
+		m.statusText = "Delete not allowed"
+		m.detailText = "RBAC: " + m.permissions.DeleteReason
+		return m
+	}
+	if pod := m.selectedPodName(); pod != "" {
+		m.pendingConfirm = &pendingConfirmation{Action: "delete", Target: pod, Message: "Delete pod " + pod + "?"}
+	}
+	return m
+}
+
+func (m Model) requestPatch() Model {
+	if m.cfg.ReadOnly {
+		m.statusText = "Read-only mode: patch blocked"
+		return m
+	}
+	if !m.permissions.PatchAllowed {
+		m.statusText = "Patch not allowed"
+		m.detailText = "RBAC: " + m.permissions.PatchReason
+		return m
+	}
+	if pod := m.selectedPodName(); pod != "" {
+		m.pendingConfirm = &pendingConfirmation{Action: "patch", Target: pod, Message: "Patch pod " + pod + " annotation?"}
+	}
+	return m
+}
+
+func (m Model) requestCancel() Model {
+	if m.cfg.ReadOnly {
+		m.statusText = "Read-only mode: cancel blocked"
+		return m
+	}
+	if !m.permissions.CancelAllowed {
+		m.statusText = "Cancel not allowed"
+		m.detailText = "RBAC: " + m.permissions.CancelReason
+		return m
+	}
+	if pr := m.selectedPipelineRunName(); pr != "" {
+		m.pendingConfirm = &pendingConfirmation{Action: "cancel", Target: pr, Message: "Cancel PipelineRun " + pr + "?"}
+	}
+	return m
 }

@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/charmbracelet/bubbles/list"
-	"github.com/example/deckhand/internal/resources"
+	"github.com/jdogg172/deckhand/internal/resources"
 )
 
 type PodItem struct{ Pod resources.PodSummary }

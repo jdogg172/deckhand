@@ -7,9 +7,9 @@ import (
 
 	tea "github.com/charmbracelet/bubbletea"
 
-	"github.com/example/deckhand/internal/app"
-	"github.com/example/deckhand/internal/clients"
-	"github.com/example/deckhand/internal/config"
+	"github.com/jdogg172/deckhand/internal/app"
+	"github.com/jdogg172/deckhand/internal/clients"
+	"github.com/jdogg172/deckhand/internal/config"
 )
 
 func main() {

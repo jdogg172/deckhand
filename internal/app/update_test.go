@@ -6,9 +6,9 @@ import (
 
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/example/deckhand/internal/config"
-	"github.com/example/deckhand/internal/resources"
-	"github.com/example/deckhand/internal/ui/panes"
+	"github.com/jdogg172/deckhand/internal/config"
+	"github.com/jdogg172/deckhand/internal/resources"
+	"github.com/jdogg172/deckhand/internal/ui/panes"
 )
 
 func TestHandleConfirmationInput_Cancel(t *testing.T) {
@@ -269,5 +269,35 @@ func TestUpdate_MutatingActions_ReadOnlyAndRBAC(t *testing.T) {
 				t.Fatalf("did not expect pending confirmation, got %+v", *um.pendingConfirm)
 			}
 		})
+	}
+}
+
+func TestUpdate_RouteAndTektonAPIMissingGracefulMessages(t *testing.T) {
+	delegate := list.NewDefaultDelegate()
+	l := list.New([]list.Item{}, delegate, 0, 0)
+	m := Model{list: l}
+
+	updated, _ := m.Update(routesLoadedMsg{Err: resources.ErrAPINotAvailable})
+	um, ok := updated.(Model)
+	if !ok {
+		t.Fatalf("expected model type")
+	}
+	if um.statusText != "OpenShift Route API not available" {
+		t.Fatalf("unexpected route-missing status: %q", um.statusText)
+	}
+	if !strings.Contains(um.detailText, "route.openshift.io/v1") {
+		t.Fatalf("expected route-missing detail text, got %q", um.detailText)
+	}
+
+	updated, _ = um.Update(pipelinesLoadedMsg{Err: resources.ErrAPINotAvailable})
+	um2, ok := updated.(Model)
+	if !ok {
+		t.Fatalf("expected model type")
+	}
+	if um2.statusText != "Tekton API not available" {
+		t.Fatalf("unexpected tekton-missing status: %q", um2.statusText)
+	}
+	if !strings.Contains(um2.detailText, "tekton.dev/v1") {
+		t.Fatalf("expected tekton-missing detail text, got %q", um2.detailText)
 	}
 }

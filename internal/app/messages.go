@@ -1,8 +1,8 @@
 package app
 
 import (
-	"github.com/example/deckhand/internal/clients"
-	"github.com/example/deckhand/internal/resources"
+	"github.com/jdogg172/deckhand/internal/clients"
+	"github.com/jdogg172/deckhand/internal/resources"
 )
 
 type podsLoadedMsg struct {

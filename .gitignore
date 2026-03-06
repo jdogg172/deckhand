@@ -1,10 +1,13 @@
 # Build artifacts
 /dist/
+/build/
 *.exe
 *.exe~
 *.dll
 *.so
 *.dylib
+*.test
+*.out
 
 # Archives and local packs
 *.zip
@@ -18,4 +21,9 @@ kind-config.yaml
 # OS/editor noise
 .DS_Store
 Thumbs.db
-.vscode/*.log
+.vscode/
+.idea/
+
+# Coverage
+coverage.out
+coverage.html

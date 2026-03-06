@@ -1,4 +1,4 @@
-module github.com/example/deckhand
+module github.com/jdogg172/deckhand
 
 go 1.24.0
 

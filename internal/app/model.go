@@ -10,14 +10,14 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 
-	"github.com/example/deckhand/internal/actions"
-	"github.com/example/deckhand/internal/clients"
-	"github.com/example/deckhand/internal/config"
-	"github.com/example/deckhand/internal/rbac"
-	"github.com/example/deckhand/internal/resources"
-	"github.com/example/deckhand/internal/ui/modes"
-	"github.com/example/deckhand/internal/ui/panes"
-	"github.com/example/deckhand/internal/ui/styles"
+	"github.com/jdogg172/deckhand/internal/actions"
+	"github.com/jdogg172/deckhand/internal/clients"
+	"github.com/jdogg172/deckhand/internal/config"
+	"github.com/jdogg172/deckhand/internal/rbac"
+	"github.com/jdogg172/deckhand/internal/resources"
+	"github.com/jdogg172/deckhand/internal/ui/modes"
+	"github.com/jdogg172/deckhand/internal/ui/panes"
+	"github.com/jdogg172/deckhand/internal/ui/styles"
 )
 
 type listScope string

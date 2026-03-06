@@ -9,9 +9,9 @@ import (
 	"time"
 
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/example/deckhand/internal/clients"
-	"github.com/example/deckhand/internal/ui/modes"
-	"github.com/example/deckhand/internal/ui/panes"
+	"github.com/jdogg172/deckhand/internal/clients"
+	"github.com/jdogg172/deckhand/internal/ui/modes"
+	"github.com/jdogg172/deckhand/internal/ui/panes"
 	"k8s.io/apimachinery/pkg/api/errors"
 )
 
